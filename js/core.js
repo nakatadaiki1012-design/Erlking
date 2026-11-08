@@ -185,7 +185,7 @@
       <div class="stage">
         <div class="art-slot"></div>
         <div class="keys-slot"><div class="keys-host"></div>
-          <div class="keys-legend"><span><i class="lg-piano"></i>ピアノ</span><label><input type="checkbox" class="kv"><i class="lg-voice"></i>歌の音も出す</label><span class="kn">録音から自動で読み取った音です（少しまちがいもあります）</span></div></div>
+          <div class="keys-legend"><span><i class="lg-piano"></i>ピアノ</span><label><input type="checkbox" class="kv"><i class="lg-voice"></i>歌の音も出す</label><label><input type="checkbox" class="kf">落ちてくる音も出す</label><span class="kn">録音から自動で読み取った音です（少しまちがいもあります）</span></div></div>
         <div class="who"></div>
         <div class="lyric"><p class="ja"></p><p class="de"></p></div>
         <div class="note"></div>
@@ -228,6 +228,9 @@
         keys = window.ERLKeys.create($('.keys-host', v));
         const kv = $('.kv', v);
         kv.onchange = () => keys.setVoice(kv.checked);
+        const kf = $('.kf', v);
+        kf.checked = keys.fall;
+        kf.onchange = () => keys.setFall(kf.checked);
       }
       v.dataset.lyrics = o.lyrics;
       const i = Song.at(t);

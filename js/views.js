@@ -302,10 +302,13 @@
       const body = $('.fig-body', card);
       if (figMode === 'keys' && window.ERLKeys) {
         body.className = 'fig-body is-keys';
-        body.innerHTML = '<div class="keys-host"></div><div class="keys-legend"><span><i class="lg-piano"></i>ピアノ</span><label><input type="checkbox" class="kv"><i class="lg-voice"></i>歌の音も出す</label><span class="kn">「▶」で聴くと、鍵盤が動きます（録音から自動で読み取った音）</span></div>';
+        body.innerHTML = '<div class="keys-host"></div><div class="keys-legend"><span><i class="lg-piano"></i>ピアノ</span><label><input type="checkbox" class="kv"><i class="lg-voice"></i>歌の音も出す</label><label><input type="checkbox" class="kf">落ちてくる音も出す</label><span class="kn">「▶」で聴くと、鍵盤が動きます（録音から自動で読み取った音）</span></div>';
         gkeys = window.ERLKeys.create($('.keys-host', body));
         const kv = $('.kv', body);
         kv.onchange = () => gkeys.setVoice(kv.checked);
+        const kf = $('.kf', body);
+        kf.checked = gkeys.fall;
+        kf.onchange = () => gkeys.setFall(kf.checked);
       } else {
         body.className = 'fig-body';
         body.innerHTML = window.ERLArt.fig(g.fig);
