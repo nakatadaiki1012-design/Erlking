@@ -10,6 +10,7 @@
 <div class="entry">
   <h1>魔王</h1>
   <div class="sub">シューベルト作曲／ゲーテ作詩　―　鑑賞アプリ</div>
+  <div class="entry-scene" id="scene"></div>
   <div class="cast">
     <div class="cast-item r-narrator"><span class="mk r-narrator">語</span>語り手</div>
     <div class="cast-item r-father"><span class="mk r-father">父</span>父</div>
@@ -21,5 +22,7 @@
     <a class="door" href="student.html"><b>生徒用</b><span>タブレットで使う</span></a>
   </div>
 </div>
+<script src="js/art.js"></script>
+<script>document.getElementById('scene').innerHTML = ERLArt.scene();</script>
 </body>
 </html>

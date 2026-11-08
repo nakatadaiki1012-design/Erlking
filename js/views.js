@@ -34,6 +34,7 @@
       const c = el('div', 'card r-' + r);
       const cp = D.compare[r];
       c.innerHTML = `<h3>${mark(r)}${D.roles[r].name}</h3>
+        <div class="card-art">${window.ERLArt.char(r)}</div>
         <button class="btn play-clip">▶ 聴く</button>
         <div class="hidden-pts"><button class="btn small show">ポイントを見る</button></div>
         <ul style="display:none">${cp.points.map((p) => `<li>${p}</li>`).join('')}</ul>`;
@@ -84,7 +85,7 @@
       const cp = D.compare[cur];
       const mine = picks[cur] || [];
       detail.className = 's-detail r-' + cur;
-      detail.innerHTML = `<h3>${mark(cur)}${D.roles[cur].name}</h3>
+      detail.innerHTML = `<div class="s-art">${cur === 'piano' ? window.ERLArt.roll('gallop') : window.ERLArt.char(cur)}</div><h3>${mark(cur)}${D.roles[cur].name}</h3>
         <div class="acts"><button class="btn primary play-clip">${playing ? '■ 止める' : '▶ 聴く'}</button></div>
         <div class="q">${cur === 'piano' ? 'ピアノは何を表している感じがする？' : '声や歌い方は、どんな感じ？'}（いくつでも選べます）</div>
         <div class="chips">${D.words.map((w) => `<button class="chip ${mine.includes(w) ? 'on' : ''}">${w}</button>`).join('')}</div>
@@ -286,7 +287,7 @@
         <div class="g-ask"><span class="tag">聴く前に</span><p>${g.ask}</p></div>
         <div class="g-clips">${g.clips.map((c, k) => `<button class="g-clip ${c.role ? 'r-' + c.role : ''}"><span class="ic">▶</span>${c.label}<small>${fmt(Song.clipOf(c)[1] - Song.clipOf(c)[0])}</small></button>`).join('')}</div>
         ${T ? '' : `<div class="g-memo"><span class="tag">気づいたこと・感じたこと</span><textarea rows="2" placeholder="聴いて気づいたことを書こう">${(memo[cur] || '').replace(/</g, '&lt;')}</textarea></div>`}
-        <div class="g-find"><span class="tag">わかったこと</span><ul></ul></div>
+        <div class="g-main"><div class="g-fig">${window.ERLArt.fig(g.fig)}</div><div class="g-find"><span class="tag">わかったこと</span><ul></ul></div></div>
         <div class="g-nav">
           <button class="btn g-prev" ${cur === 0 ? 'disabled' : ''}>← 前へ</button>
           <span class="g-pos">${cur + 1} / ${G.length}</span>

@@ -182,6 +182,7 @@
     v.innerHTML = `
       <div class="cast"></div>
       <div class="stage">
+        <div class="art-slot"></div>
         <div class="who"></div>
         <div class="lyric"><p class="ja"></p><p class="de"></p></div>
         <div class="note"></div>
@@ -227,6 +228,14 @@
       last = key;
       cast.querySelectorAll('.cast-item').forEach((n) => n.classList.toggle('on', n.dataset.role === s.role));
       $('.seglabel', v).textContent = o.names ? s.label : '';
+      const A = window.ERLArt;
+      let art;
+      if (s.role === 'piano') art = A.roll(i === Song.segs.length - 1 ? 'ending' : 'gallop');
+      else if (!o.names) art = A.char('unknown');
+      else art = A.char(s.role, s.role === 'erlking' && Song.ref('erlking:3') === s ? 'scary' : 'sweet');
+      const slot = $('.art-slot', v);
+      slot.innerHTML = art;
+      slot.className = 'art-slot ' + (s.role === 'piano' ? 'is-roll' : 'is-char');
       const who = $('.who', v);
       if (s.role === 'piano') {
         who.innerHTML = `${mark('piano')}<span>ピアノ</span>`;

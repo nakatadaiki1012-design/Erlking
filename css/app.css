@@ -319,12 +319,11 @@ body:not([data-mode="listen"]) .listen-only { display: none; }
   border: 2px solid var(--line); border-radius: 10px; padding: 0.4em 0.7em; resize: none; user-select: text; -webkit-user-select: text;
 }
 .g-memo textarea:focus { outline: none; border-color: var(--muted); }
-.g-find { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 0.5em; align-items: flex-start; }
+.g-find { flex: 0 0 auto; min-height: 0; display: flex; flex-direction: column; gap: 0.5em; align-items: flex-start; }
 .g-find ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 0.45em; }
 .g-find li { background: var(--bg2); border-left: 0.3em solid var(--ok); border-radius: 6px; padding: 0.35em 0.8em; animation: pop .3s ease; }
 .g-find .tag { display: none; }
 .g-find.open .tag { display: inline-block; margin: 0; }
-@media (min-width: 1000px) { .g-find ul { display: grid; grid-template-columns: 1fr 1fr; } }
 @keyframes pop { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 .g-nav { display: flex; align-items: center; gap: 1em; }
 .g-pos { color: var(--muted); }
@@ -342,3 +341,61 @@ body.teacher .g-ask p { font-size: 1.4em; }
   .g-card { font-size: 0.88em; gap: 0.6em; padding: 0.8em 1.2em; }
   .g-memo textarea { padding: 0.25em 0.6em; }
 }
+
+/* ---------- イラスト・ピアノの図 ---------- */
+.art { display: block; width: 100%; height: 100%; }
+.art text { font-family: inherit; }
+.art .n { opacity: .45; }
+.art .n.rh { fill: var(--son); }
+.art .n.lh { fill: var(--father); }
+body.is-playing .art .n { animation: note 1.67s linear infinite; animation-delay: var(--d); opacity: .3; }
+@keyframes note { 0%, 9% { opacity: 1; } 22%, 100% { opacity: .3; } }
+.art-scene .ghost { animation: ghost 5s ease-in-out infinite; }
+.art-scene .wind path { stroke-dasharray: 30 14; animation: wind 3s linear infinite; }
+@keyframes ghost { 50% { transform: translate(258px, 28px) scale(.72); } }
+@keyframes wind { to { stroke-dashoffset: -88; } }
+@media (prefers-reduced-motion: reduce) { .art * { animation: none !important; } }
+
+/* 聴く */
+.art-slot { flex: 1 1 0; min-height: 0; max-height: 13em; width: 100%; display: flex; justify-content: center; }
+.stage > .who, .stage > .lyric, .stage > .note { flex: none; }
+.art-slot.is-char .art { width: auto; aspect-ratio: 100 / 120; }
+.art-slot.is-roll .art { width: auto; aspect-ratio: 400 / 160; max-width: 100%; }
+.art-slot.is-char .art { animation: popin .35s ease; }
+@keyframes popin { from { transform: scale(.85); opacity: 0; } }
+
+/* ガイド */
+.g-fig { flex: 1 1 0; min-height: 3em; display: flex; justify-content: center; align-items: center; }
+.g-fig > .art { max-width: 40em; }
+.art-pair { display: flex; gap: 1em; height: 100%; width: 100%; justify-content: center; }
+.art-pair > .art { flex: 1 1 0; min-width: 0; max-width: 26em; }
+.art-pair.wide > .art { flex: 3 1 0; max-width: 36em; }
+.art-side { flex: 0 1 8em; display: flex; flex-direction: column; align-items: center; justify-content: center; min-width: 0; min-height: 0; }
+.art-side .art { flex: 1 1 0; min-height: 0; }
+.art-cap { font-size: 0.75em; color: var(--muted); text-align: center; line-height: 1.4; }
+
+/* くらべる */
+.card-art { flex: 1 1 0; min-height: 3em; display: flex; justify-content: center; }
+.card-art .art { max-width: 9em; }
+.card.r-piano .card-art .art { max-width: 100%; }
+.s-detail { position: relative; }
+.s-art { position: absolute; right: 1em; bottom: 4.2em; width: 28%; max-width: 13em; height: 45%; opacity: .95; pointer-events: none; }
+.s-detail.r-piano .s-art { width: 50%; max-width: 22em; height: 35%; }
+
+/* 入口 */
+.entry-scene { height: min(36vh, 16em); aspect-ratio: 400 / 160; max-width: 92vw; }
+.entry { gap: 1.4em; }
+@media (max-width: 1400px) { .brand small { display: none; } .tab { padding: 0.35em 0.95em; } }
+
+.g-main { flex: 1 1 0; min-height: 0; display: flex; gap: 1.2em; }
+.g-main .g-fig { flex: 1 1 0; min-width: 0; min-height: 0; }
+.g-main .g-find { flex: 0 0 0; overflow: hidden; }
+.g-main .g-find.open { flex: 1.8 1 0; }
+.g-main .g-find li { font-size: 0.84em; padding: 0.3em 0.7em; line-height: 1.45; }
+.g-main .g-find ul { gap: 0.35em; }
+@media (max-width: 900px) {
+  .g-main { flex-direction: column; }
+  .g-main .g-fig { flex: 1 1 0; }
+  .g-main .g-find, .g-main .g-find.open { flex: none; }
+}
+@media (max-height: 800px) { body.teacher .g-ask p { font-size: 1.22em; } }
