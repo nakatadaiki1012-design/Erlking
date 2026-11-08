@@ -221,5 +221,107 @@
     return { go, get cur() { return cur; } };
   }
 
-  window.ERLViews = { TeacherCompare, StudentCompare, QuizView, Sheet, Tabs, creditHTML, CryRow };
+  /* ---------- ガイド（聴きどころを順番に） ---------- */
+  function GuideView(host, variant) {
+    const T = variant === 'teacher';
+    const G = D.guide;
+    const v = el('section', 'view v-guide');
+    v.innerHTML = `<ol class="g-list"></ol><div class="g-card"></div>`;
+    host.append(v);
+    const list = $('.g-list', v), card = $('.g-card', v);
+    const memo = store.get('memo', {});
+    let cur = store.get(T ? 't.guide' : 's.guide', 0);
+    if (!(cur >= 0 && cur < G.length)) cur = 0;
+    let shown = 0;       // 先生用：「わかったこと」をいくつ見せたか
+    let playing = -1;    // 流れている「聴く部分」の番号
+    G.forEach((g, i) => {
+      const li = el('li', '', `<button><span class="n">${i + 1}</span><span class="t">${g.short}</span></button>`);
+      $('button', li).onclick = () => go(i);
+      list.append(li);
+    });
+    function go(i) {
+      if (i < 0 || i >= G.length) return;
+      stop();
+      cur = i; shown = 0;
+      store.set(T ? 't.guide' : 's.guide', cur);
+      render();
+    }
+    function stop() { if (playing >= 0) { Player.clearClip(); Player.pause(); } playing = -1; }
+    function play(k) {
+      if (playing === k) { stop(); renderClips(); return; }
+      const c = G[cur].clips[k];
+      const [a, b] = Song.clipOf(c);
+      Player.clearClip();
+      playing = k; renderClips();
+      Player.clip(a, b, () => { if (playing === k) { playing = -1; renderClips(); } });
+    }
+    function renderClips() {
+      card.querySelectorAll('.g-clip').forEach((b, k) => {
+        b.classList.toggle('on', k === playing);
+        $('.ic', b).textContent = k === playing ? '■' : '▶';
+      });
+    }
+    function renderFind() {
+      const g = G[cur];
+      const n = T ? shown : (shown ? g.find.length : 0);
+      $('.g-find ul', card).innerHTML = g.find.slice(0, n).map((f) => `<li>${f}</li>`).join('');
+      const btn = $('.g-reveal', card);
+      if (T) {
+        btn.textContent = shown === 0 ? 'わかったことを1つ見る' : (shown < g.find.length ? 'もう1つ見る（' + shown + '/' + g.find.length + '）' : 'ぜんぶ見た');
+        btn.disabled = shown >= g.find.length;
+      } else {
+        btn.textContent = shown ? 'わかったこと：表示中' : 'わかったことを見る';
+        btn.disabled = !!shown;
+      }
+      $('.g-find', card).classList.toggle('open', n > 0);
+    }
+    function render() {
+      const g = G[cur];
+      list.querySelectorAll('li').forEach((li, i) => {
+        li.classList.toggle('on', i === cur);
+        li.classList.toggle('memo', !!(memo[i] && memo[i].trim()));
+      });
+      card.innerHTML = `
+        <div class="g-head"><span class="g-num">聴きどころ ${cur + 1}</span><h2>${g.title}</h2></div>
+        <div class="g-ask"><span class="tag">聴く前に</span><p>${g.ask}</p></div>
+        <div class="g-clips">${g.clips.map((c, k) => `<button class="g-clip ${c.role ? 'r-' + c.role : ''}"><span class="ic">▶</span>${c.label}<small>${fmt(Song.clipOf(c)[1] - Song.clipOf(c)[0])}</small></button>`).join('')}</div>
+        ${T ? '' : `<div class="g-memo"><span class="tag">気づいたこと・感じたこと</span><textarea rows="2" placeholder="聴いて気づいたことを書こう">${(memo[cur] || '').replace(/</g, '&lt;')}</textarea></div>`}
+        <div class="g-find"><span class="tag">わかったこと</span><ul></ul></div>
+        <div class="g-nav">
+          <button class="btn g-prev" ${cur === 0 ? 'disabled' : ''}>← 前へ</button>
+          <span class="g-pos">${cur + 1} / ${G.length}</span>
+          <button class="btn g-reveal"></button>
+          <button class="btn primary g-next" ${cur === G.length - 1 ? 'disabled' : ''}>次の聴きどころ →</button>
+        </div>`;
+      card.querySelectorAll('.g-clip').forEach((b, k) => b.onclick = () => play(k));
+      $('.g-reveal', card).onclick = reveal;
+      $('.g-prev', card).onclick = () => go(cur - 1);
+      $('.g-next', card).onclick = () => go(cur + 1);
+      const ta = $('textarea', card);
+      if (ta) ta.oninput = () => {
+        memo[cur] = ta.value; store.set('memo', memo);
+        list.children[cur].classList.toggle('memo', !!ta.value.trim());
+      };
+      renderFind();
+    }
+    function reveal() {
+      const g = G[cur];
+      shown = T ? Math.min(shown + 1, g.find.length) : g.find.length;
+      renderFind();
+    }
+    render();
+    document.addEventListener('erl:song', () => { if (playing < 0) render(); });
+    return {
+      el: v, stop,
+      key(k) {
+        if (k === 'next') go(cur + 1);
+        else if (k === 'prev') go(cur - 1);
+        else if (k === 'reveal') reveal();
+        else if (k === 'play') play(playing >= 0 ? playing : 0);
+      }
+    };
+  }
+
+  window.ERLViews = {
+    GuideView, TeacherCompare, StudentCompare, QuizView, Sheet, Tabs, creditHTML, CryRow };
 })();

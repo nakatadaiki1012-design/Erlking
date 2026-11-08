@@ -1,19 +1,20 @@
 /* 先生用画面 */
 (function () {
   const { D, $, el, fmt, store, Song, Player, ListenView, mark } = window.ERLCore;
-  const { TeacherCompare, QuizView, Sheet, Tabs, creditHTML } = window.ERLViews;
+  const { GuideView, TeacherCompare, QuizView, Sheet, Tabs, creditHTML } = window.ERLViews;
   const main = $('main');
 
   const LYR = [['ja', '日本語'], ['both', '日本語＋ドイツ語'], ['de', 'ドイツ語'], ['none', 'なし']];
   const opt = { names: store.get('t.names', true), lyrics: store.get('t.lyrics', 'ja') };
 
   const views = {
+    guide: GuideView(main, 'teacher'),
     listen: ListenView(main, { get: () => opt }),
     compare: TeacherCompare(main),
     quiz: QuizView(main, 'teacher')
   };
   const tabs = Tabs($('.tabs'), views, (name) => { if (name === 'quiz') views.quiz.enter(); });
-  tabs.go('listen');
+  tabs.go('guide');
 
   /* ---- 上のボタン ---- */
   const bNames = $('.t-names'), bLyr = $('.t-lyrics');
@@ -75,10 +76,10 @@
 ` : ''}
       ${pane === 'keys' ? `
       <div class="keys">
-        <kbd>スペース</kbd><span>再生／停止（クイズでは もう一度聴く）</span>
-        <kbd>← →</kbd><span>前の場面／次の場面</span>
-        <kbd>1 2 3</kbd><span>聴く／くらべる／クイズ</span>
-        <kbd>Enter</kbd><span>クイズ：答えを見る → 次へ</span>
+        <kbd>スペース</kbd><span>再生／停止（ガイドでは 聴く部分、クイズでは もう一度聴く）</span>
+        <kbd>← →</kbd><span>ガイド：前／次の聴きどころ　聴く：前／次の場面</span>
+        <kbd>Enter</kbd><span>ガイド：わかったことを1つ見る　クイズ：答えを見る → 次へ</span>
+        <kbd>1 2 3 4</kbd><span>ガイド／聴く／くらべる／クイズ</span>
         <kbd>H</kbd><span>人物の名前をかくす／出す</span>
         <kbd>L</kbd><span>歌詞の表示を切りかえ</span>
         <kbd>F</kbd><span>全画面</span>
@@ -149,14 +150,17 @@
     switch (e.key) {
       case ' ':
         e.preventDefault();
-        if (mode === 'quiz') views.quiz.key('replay'); else { Player.clearClip(); Player.toggle(); }
+        if (mode === 'quiz') views.quiz.key('replay');
+        else if (mode === 'guide') views.guide.key('play');
+        else { Player.clearClip(); Player.toggle(); }
         break;
-      case 'ArrowRight': if (mode === 'listen') { e.preventDefault(); views.listen.step(1); } break;
-      case 'ArrowLeft': if (mode === 'listen') { e.preventDefault(); views.listen.step(-1); } break;
-      case 'Enter': if (mode === 'quiz') { e.preventDefault(); views.quiz.key('go'); } break;
-      case '1': tabs.go('listen'); break;
-      case '2': tabs.go('compare'); break;
-      case '3': tabs.go('quiz'); break;
+      case 'ArrowRight': e.preventDefault(); if (mode === 'listen') views.listen.step(1); else if (mode === 'guide') views.guide.key('next'); break;
+      case 'ArrowLeft': e.preventDefault(); if (mode === 'listen') views.listen.step(-1); else if (mode === 'guide') views.guide.key('prev'); break;
+      case 'Enter': e.preventDefault(); if (mode === 'quiz') views.quiz.key('go'); else if (mode === 'guide') views.guide.key('reveal'); break;
+      case '1': tabs.go('guide'); break;
+      case '2': tabs.go('listen'); break;
+      case '3': tabs.go('compare'); break;
+      case '4': tabs.go('quiz'); break;
       case 'h': case 'H': toggleNames(); break;
       case 'l': case 'L': cycleLyrics(); break;
       case 'f': case 'F': full(); break;

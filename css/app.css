@@ -283,3 +283,62 @@ body.teacher .lyric .ja { font-size: 2.5em; }
 body:not([data-mode="listen"]) .listen-only { display: none; }
 .pane-pick { align-self: flex-start; }
 .sheet .body { display: flex; flex-direction: column; gap: 0.9em; }
+
+/* ---------- ガイド ---------- */
+.v-guide { grid-template-columns: minmax(11em, 15em) 1fr; gap: 1.2em; }
+.g-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.35em; min-height: 0; }
+.g-list button {
+  width: 100%; display: flex; align-items: center; gap: 0.6em; text-align: left;
+  background: none; border: 2px solid transparent; border-radius: 10px; padding: 0.35em 0.6em; color: var(--muted); font-weight: 700;
+}
+.g-list .n { display: inline-grid; place-items: center; width: 1.7em; height: 1.7em; border-radius: 50%; background: var(--panel); color: var(--text); flex: none; font-size: 0.9em; }
+.g-list li.on button { border-color: var(--line); background: var(--panel); color: var(--text); }
+.g-list li.on .n { background: var(--text); color: var(--bg); }
+.g-list li.memo .t::after { content: ' ✎'; color: var(--ok); }
+.g-card {
+  background: var(--panel); border-radius: 18px; padding: 1em 1.4em; min-height: 0; overflow: hidden;
+  display: flex; flex-direction: column; gap: 0.75em;
+}
+.g-head { display: flex; align-items: baseline; gap: 0.8em; flex-wrap: wrap; }
+.g-num { color: var(--son); font-weight: 800; white-space: nowrap; }
+.g-head h2 { margin: 0; font-size: 1.45em; }
+.tag { display: inline-block; font-size: 0.75em; font-weight: 800; color: var(--muted); letter-spacing: 0.05em; margin-bottom: 0.2em; }
+.g-ask p { margin: 0; font-size: 1.25em; font-weight: 700; line-height: 1.5; }
+.g-clips { display: flex; flex-wrap: wrap; gap: 0.5em; }
+.g-clip {
+  display: inline-flex; align-items: center; gap: 0.5em; border: 2px solid var(--c, var(--line)); background: var(--bg2);
+  border-radius: 99px; padding: 0.4em 1.1em 0.4em 0.5em; font-weight: 800;
+}
+.g-clip .ic { display: inline-grid; place-items: center; width: 1.8em; height: 1.8em; border-radius: 50%; background: var(--c, var(--text)); color: var(--bg); font-size: 0.8em; }
+.g-clip small { color: var(--muted); font-weight: 400; }
+.g-clip.on { background: var(--c, var(--text)); color: var(--bg); }
+.g-clip.on .ic { background: var(--bg); color: var(--c, var(--text)); }
+.g-clip.on small { color: var(--bg); }
+.g-memo textarea {
+  width: 100%; font: inherit; font-size: 0.95em; color: var(--text); background: var(--bg2);
+  border: 2px solid var(--line); border-radius: 10px; padding: 0.4em 0.7em; resize: none; user-select: text; -webkit-user-select: text;
+}
+.g-memo textarea:focus { outline: none; border-color: var(--muted); }
+.g-find { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 0.5em; align-items: flex-start; }
+.g-find ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 0.45em; }
+.g-find li { background: var(--bg2); border-left: 0.3em solid var(--ok); border-radius: 6px; padding: 0.35em 0.8em; animation: pop .3s ease; }
+.g-find .tag { display: none; }
+.g-find.open .tag { display: inline-block; margin: 0; }
+@media (min-width: 1000px) { .g-find ul { display: grid; grid-template-columns: 1fr 1fr; } }
+@keyframes pop { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.g-nav { display: flex; align-items: center; gap: 1em; }
+.g-pos { color: var(--muted); }
+.g-reveal { margin-left: auto; }
+.g-nav .g-prev { order: -1; }
+body.teacher .g-ask p { font-size: 1.4em; }
+@media (max-width: 900px) {
+  .v-guide { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
+  .g-list { flex-direction: row; flex-wrap: wrap; }
+  .g-list .t { display: none; }
+  .g-list button { padding: 0.2em; }
+}
+.g-find li { font-size: 0.92em; }
+@media (max-height: 760px) and (min-width: 641px) {
+  .g-card { font-size: 0.88em; gap: 0.6em; padding: 0.8em 1.2em; }
+  .g-memo textarea { padding: 0.25em 0.6em; }
+}

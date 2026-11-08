@@ -66,9 +66,23 @@
       let li = -1;
       seg.lines.forEach((l, i) => { if (t >= l.t - 0.05) li = i; });
       return li;
+    },
+    // 'erlking:2'（魔王の2つ目の場面）や 'cry:1'（子どもの叫び1回目）で場面をさがす
+    ref(r) {
+      const [role, n] = r.split(':');
+      const list = role === 'cry' ? base.filter((s) => s.cry) : base.filter((s) => s.role === role);
+      return list[(+n || 1) - 1];
+    },
+    // ガイドの「聴く部分」→ [始まり, 終わり]（時間合わせをしても一緒に動く）
+    clipOf(c) {
+      const s = this.ref(c.ref);
+      const e = c.to ? (c.to === 'end' ? this.duration : this.ref(c.to).end) : s.end;
+      const a = s.start + (c.skip || 0);
+      return [a, c.len ? Math.min(a + c.len, e) : e];
     }
   };
   Song.apply(store.get('starts', null));
+  Object.entries(D.tips || {}).forEach(([r, tip]) => { const s = Song.ref(r); if (s) s.tip = tip; });
 
   /* ---------- 再生 ---------- */
   const audio = new Audio();
@@ -229,7 +243,7 @@
       $('.de', v).textContent = line ? line.de : '';
       let note = '';
       if (s.role === 'piano') note = s.note || '';
-      else if (s.cry && o.names) note = '子どもの叫び ' + '①②③'[s.cry - 1] + '回目' + (s.cry > 1 ? '　― 前より高くなった？' : '');
+      else if (o.names && s.tip) note = '💡 ' + s.tip;
       $('.note', v).textContent = note;
     }
     Player.on(render);
