@@ -399,3 +399,51 @@ body.is-playing .art .n { animation: note 1.67s linear infinite; animation-delay
   .g-main .g-find, .g-main .g-find.open { flex: none; }
 }
 @media (max-height: 800px) { body.teacher .g-ask p { font-size: 1.22em; } }
+
+/* ガイドの時だけ出すボタン */
+body:not([data-mode="guide"]) .guide-only { display: none; }
+
+/* ---------- ことばのヒント ---------- */
+.sheet.sheet-wide { width: min(96vw, 78em); }
+.wb { display: grid; grid-template-columns: 1.25fr 1fr; gap: 1.2em; }
+.wb-col { display: flex; flex-direction: column; gap: 0.45em; }
+.wb-h { font-weight: 800; font-size: 1.1em; }
+.wb-h small { color: var(--muted); font-weight: 400; margin-left: 0.4em; }
+.wb-row { display: flex; gap: 0.6em; align-items: baseline; }
+.wb-k { flex: none; width: 4.2em; color: var(--muted); font-weight: 700; }
+.wb .chips { gap: 0.3em; }
+.wb .chip { padding: 0.15em 0.75em; font-size: 0.95em; }
+.wb .chip.on { background: var(--ok); border-color: var(--ok); color: var(--bg); }
+.wb-col:first-child .chip { border-color: #3d5a8a; }
+.wb-col:last-child .chip { border-color: #6a4a8a; }
+.wb-pat { margin-top: auto; background: var(--panel); border-radius: 10px; padding: 0.6em 0.9em; }
+body.teacher .sheet.sheet-wide { font-size: 1em; }
+.g-memo-h { display: flex; align-items: center; justify-content: space-between; gap: 0.6em; }
+
+/* ---------- 鑑賞シート ---------- */
+.ms-name { display: flex; align-items: center; gap: 0.6em; font-weight: 700; }
+.ms-input { flex: 1; font: inherit; color: var(--text); background: var(--panel); border: 2px solid var(--line); border-radius: 8px; padding: 0.3em 0.6em; user-select: text; }
+.ms-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5em 1em; }
+.ms-item { background: var(--panel); border-radius: 10px; padding: 0.45em 0.8em; font-size: 0.92em; }
+.ms-item p { margin: 0.2em 0 0; }
+.ms-empty { color: var(--muted); }
+.print-area { display: none; }
+@media print {
+  @page { size: A4; margin: 14mm; }
+  body { background: #fff !important; color: #000; height: auto; overflow: visible; font-size: 11pt; }
+  .app, .sheet-bg { display: none !important; }
+  .print-area { display: block; }
+  .print-area h1 { font-size: 16pt; margin: 0 0 6mm; }
+  .print-area .ms-name { margin-bottom: 5mm; }
+  .print-area .ms-line { display: inline-block; min-width: 90mm; border-bottom: 1px solid #000; }
+  .print-area .ms-grid { display: block; }
+  .print-area .ms-item { background: none; border: 1px solid #888; border-radius: 4px; padding: 3mm 4mm; margin-bottom: 3mm; break-inside: avoid; min-height: 18mm; }
+  .print-area .ms-empty { color: #999; }
+}
+body.teacher .sheet.sheet-wide { font-size: 0.8em; }
+@media (max-height: 860px) and (min-width: 901px) {
+  .g-list { gap: 0.12em; }
+  .g-list button { padding: 0.12em 0.5em; }
+  .g-list .n { width: 1.55em; height: 1.55em; }
+}
+@media (max-width: 1300px) and (min-width: 901px) { body.teacher .g-main .g-find li { font-size: 0.78em; } }

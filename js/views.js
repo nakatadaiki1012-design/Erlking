@@ -230,7 +230,7 @@
     v.innerHTML = `<ol class="g-list"></ol><div class="g-card"></div>`;
     host.append(v);
     const list = $('.g-list', v), card = $('.g-card', v);
-    const memo = store.get('memo', {});
+    const memo = store.get('memo2', {});
     let cur = store.get(T ? 't.guide' : 's.guide', 0);
     if (!(cur >= 0 && cur < G.length)) cur = 0;
     let shown = 0;       // 先生用：「わかったこと」をいくつ見せたか
@@ -280,13 +280,13 @@
       const g = G[cur];
       list.querySelectorAll('li').forEach((li, i) => {
         li.classList.toggle('on', i === cur);
-        li.classList.toggle('memo', !!(memo[i] && memo[i].trim()));
+        li.classList.toggle('memo', !!(memo[G[i].id] && memo[G[i].id].trim()));
       });
       card.innerHTML = `
         <div class="g-head"><span class="g-num">聴きどころ ${cur + 1}</span><h2>${g.title}</h2></div>
         <div class="g-ask"><span class="tag">聴く前に</span><p>${g.ask}</p></div>
         <div class="g-clips">${g.clips.map((c, k) => `<button class="g-clip ${c.role ? 'r-' + c.role : ''}"><span class="ic">▶</span>${c.label}<small>${fmt(Song.clipOf(c)[1] - Song.clipOf(c)[0])}</small></button>`).join('')}</div>
-        ${T ? '' : `<div class="g-memo"><span class="tag">気づいたこと・感じたこと</span><textarea rows="2" placeholder="聴いて気づいたことを書こう">${(memo[cur] || '').replace(/</g, '&lt;')}</textarea></div>`}
+        ${T ? '' : `<div class="g-memo"><div class="g-memo-h"><span class="tag">気づいたこと・感じたこと</span><button class="btn small g-words">ことばのヒント</button></div><textarea rows="2" placeholder="${D.wordbank.pattern}">${(memo[g.id] || '').replace(/</g, '&lt;')}</textarea></div>`}
         <div class="g-main"><div class="g-fig">${window.ERLArt.fig(g.fig)}</div><div class="g-find"><span class="tag">わかったこと</span><ul></ul></div></div>
         <div class="g-nav">
           <button class="btn g-prev" ${cur === 0 ? 'disabled' : ''}>← 前へ</button>
@@ -300,9 +300,11 @@
       $('.g-next', card).onclick = () => go(cur + 1);
       const ta = $('textarea', card);
       if (ta) ta.oninput = () => {
-        memo[cur] = ta.value; store.set('memo', memo);
+        memo[g.id] = ta.value; store.set('memo2', memo);
         list.children[cur].classList.toggle('memo', !!ta.value.trim());
       };
+      const wb = $('.g-words', card);
+      if (wb && api.onWords) wb.onclick = () => api.onWords();
       renderFind();
     }
     function reveal() {
@@ -310,10 +312,19 @@
       shown = T ? Math.min(shown + 1, g.find.length) : g.find.length;
       renderFind();
     }
-    render();
-    document.addEventListener('erl:song', () => { if (playing < 0) render(); });
-    return {
+    const api = {
       el: v, stop,
+      onWords: null,
+      // ことばのヒントから、メモにことばを入れる
+      insert(w) {
+        const ta = $('textarea', card);
+        if (!ta) return;
+        const a = ta.selectionStart ?? ta.value.length, b = ta.selectionEnd ?? a;
+        ta.value = ta.value.slice(0, a) + w + ta.value.slice(b);
+        ta.selectionStart = ta.selectionEnd = a + w.length;
+        ta.dispatchEvent(new Event('input'));
+      },
+      memos() { return G.map((g, i) => ({ n: i + 1, title: g.title, text: memo[g.id] || '' })); },
       key(k) {
         if (k === 'next') go(cur + 1);
         else if (k === 'prev') go(cur - 1);
@@ -321,8 +332,54 @@
         else if (k === 'play') play(playing >= 0 ? playing : 0);
       }
     };
+    render();
+    document.addEventListener('erl:song', () => { if (playing < 0) render(); });
+    return api;
+  }
+
+  /* ---------- ことばのヒント（音楽をことばで表す） ---------- */
+  function WordSheet(pick) {
+    const W = D.wordbank;
+    const chip = (w) => `<button class="chip wb-chip" ${pick ? '' : 'tabindex="-1"'}>${w}</button>`;
+    const sh = Sheet(`<h2>ことばのヒント　<span class="small">音楽をことばで表そう</span><button class="btn small close">閉じる</button></h2>
+      <div class="wb">
+        <div class="wb-col"><div class="wb-h">どんな音？<small>（音のようす）</small></div>
+          ${W.sound.map((r) => `<div class="wb-row"><span class="wb-k">${r.k}</span><span class="chips">${r.w.map(chip).join('')}</span></div>`).join('')}</div>
+        <div class="wb-col"><div class="wb-h">どう感じた？<small>（感じたこと）</small></div>
+          ${W.feel.map((r) => `<div class="wb-row"><span class="chips">${r.map(chip).join('')}</span></div>`).join('')}
+          <div class="wb-pat"><b>書き方</b>　${W.pattern}<br><span class="small">例：ピアノが同じ音を速く打ち続けているので、あせっているように感じた。</span></div>
+        </div>
+      </div>
+      ${pick ? '<div class="small">ことばを押すと、メモに入ります。</div>' : ''}`);
+    sh.el.classList.add('sheet-wide');
+    if (pick) sh.el.querySelectorAll('.wb-chip').forEach((c) => c.onclick = () => {
+      pick(c.textContent);
+      c.classList.add('on'); setTimeout(() => c.classList.remove('on'), 500);
+    });
+    return sh;
+  }
+
+  /* ---------- 生徒用：わたしの鑑賞シート（印刷できる） ---------- */
+  function MemoSheet(getMemos) {
+    const sh = Sheet('<h2>わたしの鑑賞シート <span><button class="btn small print">印刷する</button> <button class="btn small close">閉じる</button></span></h2><div class="ms"></div>');
+    sh.el.classList.add('sheet-wide');
+    const area = el('div', 'print-area');
+    document.body.append(area);
+    function html(forPrint) {
+      const name = store.get('name', '');
+      return `${forPrint ? '<h1>「魔王」鑑賞シート</h1>' : ''}
+        <div class="ms-name">名前 ${forPrint ? `<span class="ms-line">${name.replace(/</g, '&lt;')}</span>` : `<input class="ms-input" value="${name.replace(/"/g, '&quot;')}" placeholder="年・組・番号・名前">`}</div>
+        <div class="ms-grid">${getMemos().map((m) => `<div class="ms-item"><b>${m.n}. ${m.title}</b><p>${m.text ? m.text.replace(/</g, '&lt;').replace(/\n/g, '<br>') : '<span class="ms-empty">（まだ書いていません）</span>'}</p></div>`).join('')}</div>`;
+    }
+    sh.onopen = () => {
+      $('.ms', sh.el).innerHTML = html(false);
+      const inp = $('.ms-input', sh.el);
+      inp.oninput = () => store.set('name', inp.value);
+    };
+    $('.print', sh.el).onclick = () => { area.innerHTML = html(true); window.print(); };
+    return sh;
   }
 
   window.ERLViews = {
-    GuideView, TeacherCompare, StudentCompare, QuizView, Sheet, Tabs, creditHTML, CryRow };
+    GuideView, WordSheet, MemoSheet, TeacherCompare, StudentCompare, QuizView, Sheet, Tabs, creditHTML, CryRow };
 })();

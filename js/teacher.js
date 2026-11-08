@@ -1,7 +1,7 @@
 /* 先生用画面 */
 (function () {
   const { D, $, el, fmt, store, Song, Player, ListenView, mark } = window.ERLCore;
-  const { GuideView, TeacherCompare, QuizView, Sheet, Tabs, creditHTML } = window.ERLViews;
+  const { GuideView, WordSheet, TeacherCompare, QuizView, Sheet, Tabs, creditHTML } = window.ERLViews;
   const main = $('main');
 
   const LYR = [['ja', '日本語'], ['both', '日本語＋ドイツ語'], ['de', 'ドイツ語'], ['none', 'なし']];
@@ -17,6 +17,8 @@
   tabs.go('guide');
 
   /* ---- 上のボタン ---- */
+  const words = WordSheet(null);
+  $('.t-words').onclick = () => words.open();
   const bNames = $('.t-names'), bLyr = $('.t-lyrics');
   function syncTop() {
     bNames.textContent = opt.names ? '名前をかくす' : '名前を出す';
@@ -83,6 +85,7 @@
         <kbd>H</kbd><span>人物の名前をかくす／出す</span>
         <kbd>L</kbd><span>歌詞の表示を切りかえ</span>
         <kbd>F</kbd><span>全画面</span>
+        <kbd>W</kbd><span>ことばのヒント（音楽をことばで表す）</span>
       </div>
       <h2 style="font-size:1.05em">出典</h2>
       ${creditHTML()}` : ''}`;
@@ -141,6 +144,7 @@
   /* ---- キーボード ---- */
   document.addEventListener('keydown', (e) => {
     if (e.target.tagName === 'INPUT' || e.metaKey || e.ctrlKey || e.altKey) return;
+    if (words.isOpen) { if (e.key === 'Escape' || e.key === 'w' || e.key === 'W') words.close(); return; }
     if (settings.isOpen) {
       if (e.key === 'Escape') settings.close();
       else if (e.key === ' ' && tap >= 0) { e.preventDefault(); doTap(); }
@@ -164,6 +168,7 @@
       case 'h': case 'H': toggleNames(); break;
       case 'l': case 'L': cycleLyrics(); break;
       case 'f': case 'F': full(); break;
+      case 'w': case 'W': words.open(); break;
     }
   });
   // ボタンを押したあとスペースでボタンがもう一度押されないように

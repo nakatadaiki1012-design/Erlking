@@ -231,8 +231,8 @@
       <g transform="translate(${keyX} 54)">
         ${[0, 1, 2, 3, 4].map((i) => `<rect x="${i * w}" y="0" width="${w - 1}" height="62" rx="2" fill="${i === 1 ? 'var(--ng)' : '#f5f1e6'}"/>`).join('')}
         ${[0, 1, 3].map((i) => `<rect x="${i * w + 13}" y="0" width="13" height="38" rx="2" fill="${i === 1 ? 'var(--ng)' : INK}"/>`).join('')}
-        ${txt(50, -10, 'ぶつかり合う響き', { anchor: 'middle', size: 10, fill: 'var(--ng)' })}
-        ${txt(50, 80, 'となりの音を', { anchor: 'middle', size: 9 })}${txt(50, 92, 'いっしょに鳴らす', { anchor: 'middle', size: 9 })}
+        ${txt(50, -10, '歌とピアノが半音でぶつかる', { anchor: 'middle', size: 10, fill: 'var(--ng)' })}
+        ${txt(50, 80, '半音ちがいの音を', { anchor: 'middle', size: 9 })}${txt(50, 92, '同時に鳴らす', { anchor: 'middle', size: 9 })}
       </g>`, 'art-cries');
   }
 
@@ -265,9 +265,70 @@
   /* 魔王の伴奏を2つ並べる */
   const erlkingAcc = () => `<div class="art-pair">${roll('erlking1')}${roll('erlking2')}</div>`;
 
+  /* ---------- はじめに：作曲者と詩人 ---------- */
+  function about() {
+    const box = (x, col, icon, head, lines) => `
+      <rect x="${x}" y="8" width="180" height="112" rx="12" fill="#ffffff" fill-opacity=".05" stroke="${col}" stroke-width="2"/>
+      ${icon}
+      ${txt(x + 56, 36, head, { size: 13, fill: 'var(--text)', weight: 800 })}
+      ${lines.map((l, i) => txt(x + 56, 57 + i * 16, l, { size: 10.5, fill: i ? 'var(--muted)' : 'var(--text)' })).join('')}`;
+    const note = `<g transform="translate(16 34) scale(.85)"><ellipse cx="12" cy="40" rx="11" ry="8" fill="var(--son)"/><path d="M22 40 V4 Q32 10 36 22" stroke="var(--son)" stroke-width="4" fill="none" stroke-linecap="round"/></g>`;
+    const quill = `<g transform="translate(220 30) scale(.85)"><path d="M6 58 Q14 20 40 4 Q34 30 12 50Z" fill="var(--narrator)"/><path d="M6 58 L22 32" stroke="#0e1320" stroke-width="1.5"/><rect x="0" y="58" width="20" height="8" rx="2" fill="#9aa4b8"/></g>`;
+    return svg('0 0 400 170', `
+      ${box(10, 'var(--son)', note, '作曲：シューベルト', ['1797〜1828年', 'オーストリアの作曲家', '「歌曲の王」', '600曲以上の歌曲'])}
+      ${box(210, 'var(--narrator)', quill, '詩：ゲーテ', ['1749〜1832年', 'ドイツの詩人・作家', '「ファウスト」など'])}
+      <rect x="10" y="130" width="380" height="34" rx="10" fill="var(--erlking)" fill-opacity=".18"/>
+      ${txt(200, 152, '1815年、シューベルト18歳の作品 ― リート（ドイツ語の歌曲）', { anchor: 'middle', size: 12.5, fill: 'var(--text)', weight: 800 })}`, 'art-about');
+  }
+
+  /* ---------- 旋律の形（イメージ図） ---------- */
+  function melody() {
+    const row = (y, role, name, notes, caps, extra) => `
+      <g transform="translate(4 ${y - 2}) scale(.34)">${charG(role)}</g>
+      ${txt(44, y + 14, name, { size: 12.5, fill: 'var(--' + role + ')', weight: 800 })}
+      ${caps.map((c, i) => txt(44, y + 29 + i * 12, c, { size: 9.5 })).join('')}
+      <path d="M140 ${y + 48} H394" stroke="#3a4462" stroke-width="1"/>
+      <g transform="translate(140 ${y}) scale(.85 1) translate(-90 0)">
+        ${notes.map(([x, yy, w]) => `<rect x="${x}" y="${yy}" width="${w}" height="7" rx="3.5" fill="var(--${role})"/>`).join('')}
+      </g>
+      ${extra || ''}`;
+    // [x, 帯の中の高さ(小さいほど高い音), 長さ]
+    const father = [[90, 34, 14], [108, 28, 46], [158, 28, 14], [176, 22, 30], [210, 28, 14], [228, 34, 14], [246, 28, 30], [280, 31, 10], [294, 34, 24]];
+    const son = [[90, 14, 12], [106, 8, 30], [140, 8, 18], [162, 11, 10], [176, 8, 12]];
+    for (let i = 0; i < 8; i++) son.push([210 + i * 18, 40 - i * 4, 14]);
+    const erl = [[90, 34, 10], [104, 30, 10], [118, 24, 10], [132, 30, 10], [146, 20, 14], [164, 30, 10], [178, 24, 10], [192, 14, 16], [212, 24, 10], [226, 30, 10], [240, 36, 10], [254, 26, 10], [268, 20, 14], [286, 30, 10], [300, 24, 10]];
+    return svg('0 0 400 176', `
+      ${row(4, 'son', '子ども', son, ['高い音で訴える', '後半は半音ずつ上がる'], txt(300, 12, '半音ずつ ↗', { anchor: 'end', size: 10, fill: 'var(--son)' }))}
+      ${row(62, 'erlking', '魔王', erl, ['はずむ・楽しそう', '伴奏はとても弱い'], '')}
+      ${row(120, 'father', '父', father, ['低い音', '長くのばす音'], '')}
+      ${txt(394, 175, '※ 旋律の形のイメージ図（上ほど高い音・横の長さが音の長さ）', { anchor: 'end', size: 9 })}`, 'art-melody');
+  }
+
+  /* ---------- 調の変化（明るい長調・暗い短調） ---------- */
+  function keys() {
+    const S = window.ERLCore && window.ERLCore.Song;
+    if (!S) return '';
+    const X = (t) => 20 + (t / S.duration) * 360;
+    const segs = S.segs.map((s) => {
+      const maj = s.role === 'erlking';
+      const x = X(s.start), w = Math.max(1, X(s.end) - x - 1);
+      return `<rect x="${x}" y="64" width="${w}" height="34" rx="3" fill="${maj ? '#f2c94c' : (s.role === 'piano' ? '#26304d' : '#3b4a7e')}"/>` +
+        (s.role !== 'piano' && w > 9 ? `<circle cx="${x + w / 2}" cy="81" r="6.5" fill="var(--${s.role})"/><text x="${x + w / 2}" y="84.5" font-size="8" text-anchor="middle" fill="#0e1320" font-weight="800">${window.ERL.roles[s.role].mark}</text>` : '') +
+        (s.cry ? `<path d="M${x + w / 2} ${54 - s.cry * 6} v${10 + s.cry * 6}" stroke="var(--son)" stroke-width="2"/><path d="M${x + w / 2 - 4} ${58 - s.cry * 6} l4 -7 l4 7Z" fill="var(--son)"/>` : '') +
+        (maj ? `<text x="${x + w / 2}" y="118" font-size="10" text-anchor="middle" fill="#f2c94c" font-weight="800">長調</text>` : '');
+    }).join('');
+    return svg('0 0 400 170', `
+      ${txt(20, 20, '曲のはじめから終わりまで', { size: 11 })}${txt(380, 20, '時間 →', { anchor: 'end', size: 10 })}
+      ${txt(200, 40, '叫ぶたびに調が変わって高くなる ↑', { anchor: 'middle', size: 10.5, fill: 'var(--son)' })}
+      ${segs}
+      <rect x="40" y="136" width="16" height="12" rx="3" fill="#f2c94c"/>${txt(62, 146, '長調（明るい響き）＝ 魔王', { size: 11.5, fill: 'var(--text)' })}
+      <rect x="226" y="136" width="16" height="12" rx="3" fill="#3b4a7e"/>${txt(248, 146, '短調（暗い響き）', { size: 11.5, fill: 'var(--text)' })}
+      ${txt(200, 166, '何度も調が変わる（転調）ことで、場面の変化を表している', { anchor: 'middle', size: 10 })}`, 'art-keys');
+  }
+
   const figs = {
     gallop: () => `<div class="art-pair wide">${roll('gallop')}<div class="art-side">${char('piano')}<div class="art-cap">右手＝馬のひづめ<br>左手＝風・不気味さ</div></div></div>`,
-    voices, erlkingAcc, cries, dialogue, erlkingChange,
+    voices, erlkingAcc, cries, dialogue, erlkingChange, about, melody, keys,
     ending: () => roll('ending'),
     scene
   };
