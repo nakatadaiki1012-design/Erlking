@@ -235,6 +235,8 @@
     if (!(cur >= 0 && cur < G.length)) cur = 0;
     let shown = 0;       // 先生用：「わかったこと」をいくつ見せたか
     let playing = -1;    // 流れている「聴く部分」の番号
+    let figMode = store.get('figmode', 'fig');   // 図 or 鍵盤
+    let gkeys = null;
     G.forEach((g, i) => {
       const li = el('li', '', `<button><span class="n">${i + 1}</span><span class="t">${g.short}</span></button>`);
       $('button', li).onclick = () => go(i);
@@ -287,7 +289,7 @@
         <div class="g-ask"><span class="tag">聴く前に</span><p>${g.ask}</p></div>
         <div class="g-clips">${g.clips.map((c, k) => `<button class="g-clip ${c.role ? 'r-' + c.role : ''}"><span class="ic">▶</span>${c.label}<small>${fmt(Song.clipOf(c)[1] - Song.clipOf(c)[0])}</small></button>`).join('')}</div>
         ${T ? '' : `<div class="g-memo"><div class="g-memo-h"><span class="tag">気づいたこと・感じたこと</span><button class="btn small g-words">ことばのヒント</button></div><textarea rows="2" placeholder="${D.wordbank.pattern}">${(memo[g.id] || '').replace(/</g, '&lt;')}</textarea></div>`}
-        <div class="g-main"><div class="g-fig">${window.ERLArt.fig(g.fig)}</div><div class="g-find"><span class="tag">わかったこと</span><ul></ul></div></div>
+        <div class="g-main"><div class="g-fig"><div class="fig-switch"><button data-m="fig" class="${figMode === 'fig' ? 'on' : ''}">図</button><button data-m="keys" class="${figMode === 'keys' ? 'on' : ''}">鍵盤</button></div><div class="fig-body"></div></div><div class="g-find"><span class="tag">わかったこと</span><ul></ul></div></div>
         <div class="g-nav">
           <button class="btn g-prev" ${cur === 0 ? 'disabled' : ''}>← 前へ</button>
           <span class="g-pos">${cur + 1} / ${G.length}</span>
@@ -295,6 +297,19 @@
           <button class="btn primary g-next" ${cur === G.length - 1 ? 'disabled' : ''}>次の聴きどころ →</button>
         </div>`;
       card.querySelectorAll('.g-clip').forEach((b, k) => b.onclick = () => play(k));
+      card.querySelectorAll('.fig-switch button').forEach((b) => b.onclick = () => { figMode = b.dataset.m; store.set('figmode', figMode); render(); });
+      if (gkeys) { gkeys.destroy(); gkeys = null; }
+      const body = $('.fig-body', card);
+      if (figMode === 'keys' && window.ERLKeys) {
+        body.className = 'fig-body is-keys';
+        body.innerHTML = '<div class="keys-host"></div><div class="keys-legend"><span><i class="lg-piano"></i>ピアノ</span><label><input type="checkbox" class="kv"><i class="lg-voice"></i>歌の音も出す</label><span class="kn">「▶」で聴くと、鍵盤が動きます（録音から自動で読み取った音）</span></div>';
+        gkeys = window.ERLKeys.create($('.keys-host', body));
+        const kv = $('.kv', body);
+        kv.onchange = () => gkeys.setVoice(kv.checked);
+      } else {
+        body.className = 'fig-body';
+        body.innerHTML = window.ERLArt.fig(g.fig);
+      }
       $('.g-reveal', card).onclick = reveal;
       $('.g-prev', card).onclick = () => go(cur - 1);
       $('.g-next', card).onclick = () => go(cur + 1);

@@ -5,7 +5,7 @@
   const main = $('main');
 
   const LYR = [['ja', '日本語'], ['both', '日本語＋ドイツ語'], ['de', 'ドイツ語'], ['none', 'なし']];
-  const opt = { names: store.get('t.names', true), lyrics: store.get('t.lyrics', 'ja') };
+  const opt = { names: store.get('t.names', true), lyrics: store.get('t.lyrics', 'ja'), keys: store.get('t.keys', false) };
 
   const views = {
     guide: GuideView(main, 'teacher'),
@@ -13,6 +13,8 @@
     compare: TeacherCompare(main),
     quiz: QuizView(main, 'teacher')
   };
+  // 聴くモードのボタンは、再生ボタンの横へ
+  document.querySelectorAll('.top .listen-only').forEach((b) => { b.classList.remove('listen-only'); b.classList.add('small'); $('.v-listen .lv-tools').append(b); });
   const tabs = Tabs($('.tabs'), views, (name) => { if (name === 'quiz') views.quiz.enter(); });
   tabs.go('guide');
 
@@ -31,6 +33,10 @@
   function toggleNames() { opt.names = !opt.names; syncTop(); }
   function cycleLyrics() { const k = LYR.findIndex((l) => l[0] === opt.lyrics); opt.lyrics = LYR[(k + 1) % LYR.length][0]; syncTop(); }
   bNames.onclick = toggleNames;
+  const bKeys = $('.t-keysbtn');
+  function toggleKeys() { opt.keys = !opt.keys; store.set('t.keys', opt.keys); bKeys.classList.toggle('primary', opt.keys); views.listen.refresh(); }
+  bKeys.onclick = toggleKeys;
+  bKeys.classList.toggle('primary', opt.keys);
   bLyr.onclick = cycleLyrics;
   $('.t-full').onclick = full;
   function full() {
@@ -85,6 +91,7 @@
         <kbd>H</kbd><span>人物の名前をかくす／出す</span>
         <kbd>L</kbd><span>歌詞の表示を切りかえ</span>
         <kbd>F</kbd><span>全画面</span>
+        <kbd>K</kbd><span>聴く：鍵盤アニメーションを出す／しまう</span>
         <kbd>W</kbd><span>ことばのヒント（音楽をことばで表す）</span>
       </div>
       <h2 style="font-size:1.05em">出典</h2>
@@ -169,6 +176,7 @@
       case 'l': case 'L': cycleLyrics(); break;
       case 'f': case 'F': full(); break;
       case 'w': case 'W': words.open(); break;
+      case 'k': case 'K': toggleKeys(); break;
     }
   });
   // ボタンを押したあとスペースでボタンがもう一度押されないように

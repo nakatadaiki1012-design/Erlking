@@ -177,22 +177,27 @@
 
   /* ---------- 聴くモード ---------- */
   function ListenView(host, opt) {
+    let keys = null;
     // opt.get() → { names: bool, lyrics: 'ja'|'de'|'both'|'none' }
     const v = el('section', 'view v-listen');
     v.innerHTML = `
       <div class="cast"></div>
       <div class="stage">
         <div class="art-slot"></div>
+        <div class="keys-slot"><div class="keys-host"></div>
+          <div class="keys-legend"><span><i class="lg-piano"></i>ピアノ</span><label><input type="checkbox" class="kv"><i class="lg-voice"></i>歌の音も出す</label><span class="kn">録音から自動で読み取った音です（少しまちがいもあります）</span></div></div>
         <div class="who"></div>
         <div class="lyric"><p class="ja"></p><p class="de"></p></div>
         <div class="note"></div>
       </div>
       <div class="transport">
-        <button class="btn icon prev" aria-label="前の場面">⏮</button>
-        <button class="btn icon big play" aria-label="再生／停止"><span class="i-play">▶</span><span class="i-pause">❚❚</span></button>
-        <button class="btn icon next" aria-label="次の場面">⏭</button>
         <span class="time">0:00 / 0:00</span>
-        <span class="seglabel"></span>
+        <div class="tp-mid">
+          <button class="btn icon prev" aria-label="前の場面">⏮</button>
+          <button class="btn icon big play" aria-label="再生／停止"><span class="i-play">▶</span><span class="i-pause">❚❚</span></button>
+          <button class="btn icon next" aria-label="次の場面">⏭</button>
+        </div>
+        <div class="lv-tools"></div>
       </div>
       <div class="tlhost"></div>`;
     host.append(v);
@@ -218,16 +223,21 @@
     function render(t) {
       const o = opt.get();
       v.classList.toggle('hide-names', !o.names);
+      v.classList.toggle('show-keys', !!o.keys);
+      if (o.keys && !keys && window.ERLKeys) {
+        keys = window.ERLKeys.create($('.keys-host', v));
+        const kv = $('.kv', v);
+        kv.onchange = () => keys.setVoice(kv.checked);
+      }
       v.dataset.lyrics = o.lyrics;
       const i = Song.at(t);
       const s = Song.segs[i];
       const li = Song.lineAt(s, t);
       $('.time', v).textContent = fmt(t) + ' / ' + fmt(Song.duration);
-      const key = i + ':' + li + ':' + o.names + ':' + o.lyrics;
+      const key = i + ':' + li + ':' + o.names + ':' + o.lyrics + ':' + o.keys;
       if (key === last) return;
       last = key;
       cast.querySelectorAll('.cast-item').forEach((n) => n.classList.toggle('on', n.dataset.role === s.role));
-      $('.seglabel', v).textContent = o.names ? s.label : '';
       const A = window.ERLArt;
       let art;
       if (s.role === 'piano') art = A.roll(i === Song.segs.length - 1 ? 'ending' : 'gallop');

@@ -5,7 +5,7 @@
   const main = $('main');
 
   const LYR = [['ja', '日本語'], ['both', '日本語＋ドイツ語'], ['de', 'ドイツ語'], ['none', 'なし']];
-  const opt = { names: store.get('s.names', true), lyrics: store.get('s.lyrics', 'ja') };
+  const opt = { names: store.get('s.names', true), lyrics: store.get('s.lyrics', 'ja'), keys: store.get('s.keys', false) };
 
   const views = {
     guide: GuideView(main, 'student'),
@@ -13,6 +13,8 @@
     compare: StudentCompare(main),
     quiz: QuizView(main, 'student')
   };
+  // 聴くモードのボタンは、再生ボタンの横へ
+  document.querySelectorAll('.top .listen-only').forEach((b) => { b.classList.remove('listen-only'); b.classList.add('small'); $('.v-listen .lv-tools').append(b); });
   const tabs = Tabs($('.tabs'), views, (name) => { if (name === 'quiz') views.quiz.enter(); });
   tabs.go('guide');
 
@@ -29,6 +31,9 @@
     store.set('s.names', opt.names); store.set('s.lyrics', opt.lyrics);
     views.listen.refresh();
   }
+  const bKeys = $('.s-keysbtn');
+  bKeys.classList.toggle('primary', opt.keys);
+  bKeys.onclick = () => { opt.keys = !opt.keys; store.set('s.keys', opt.keys); bKeys.classList.toggle('primary', opt.keys); views.listen.refresh(); };
   bNames.onclick = () => { opt.names = !opt.names; sync(); };
   bLyr.onclick = () => { const k = LYR.findIndex((l) => l[0] === opt.lyrics); opt.lyrics = LYR[(k + 1) % LYR.length][0]; sync(); };
 

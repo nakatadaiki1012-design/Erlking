@@ -107,9 +107,10 @@ main { position: relative; min-height: 0; }
 [data-lyrics="ja"] .lyric .de, [data-lyrics="de"] .lyric .ja, [data-lyrics="none"] .lyric { display: none; }
 [data-lyrics="de"] .lyric .de { font-size: 1.8em; color: var(--text); font-style: normal; }
 .note { min-height: 1.5em; color: var(--muted); max-width: 46em; }
-.transport { display: flex; align-items: center; justify-content: center; gap: 0.8em; position: relative; }
-.transport .time { position: absolute; left: 0; color: var(--muted); font-variant-numeric: tabular-nums; }
-.transport .seglabel { position: absolute; right: 0; color: var(--muted); }
+.transport { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 0.8em; }
+.tp-mid { display: flex; align-items: center; gap: 0.8em; }
+.lv-tools { display: flex; justify-content: flex-end; gap: 0.4em; flex-wrap: wrap; }
+.transport .time { color: var(--muted); font-variant-numeric: tabular-nums; }
 
 /* 帯 */
 .tl { position: relative; padding-top: 1.5em; }
@@ -447,3 +448,28 @@ body.teacher .sheet.sheet-wide { font-size: 0.8em; }
   .g-list .n { width: 1.55em; height: 1.55em; }
 }
 @media (max-width: 1300px) and (min-width: 901px) { body.teacher .g-main .g-find li { font-size: 0.78em; } }
+
+/* ---------- 鍵盤アニメーション ---------- */
+.keys-slot { display: none; }
+.v-listen.show-keys .art-slot { display: none; }
+.v-listen.show-keys .keys-slot { display: flex; flex-direction: column; gap: 0.3em; flex: 1 1 0; min-height: 0; width: 100%; }
+.v-listen.show-keys .lyric { min-height: 0; }
+.v-listen.show-keys .lyric .ja { font-size: 1.5em; }
+.v-listen.show-keys .stage { gap: 0.35em; justify-content: flex-start; }
+.v-listen.show-keys .who { font-size: 0.95em; }
+.keys-host { flex: 1 1 0; min-height: 0; position: relative; }
+.keys-anim { position: absolute; inset: 0; border-radius: 10px; overflow: hidden; }
+.keys-anim canvas { display: block; }
+.keys-legend { display: flex; gap: 1em; align-items: center; justify-content: center; flex-wrap: wrap; font-size: 0.75em; color: var(--muted); }
+.keys-legend i { display: inline-block; width: 0.9em; height: 0.9em; border-radius: 3px; margin-right: 0.3em; vertical-align: -0.1em; }
+.keys-legend label { display: inline-flex; align-items: center; gap: 0.2em; cursor: pointer; }
+.lg-piano { background: var(--son); }
+.lg-voice { background: var(--erlking); }
+.keys-legend .kn { opacity: 0.8; }
+.g-fig { position: relative; flex-direction: column; }
+.fig-body { flex: 1 1 0; min-height: 0; width: 100%; display: flex; justify-content: center; align-items: center; }
+.fig-body > .art { max-width: 40em; }
+.fig-body.is-keys { flex-direction: column; align-items: stretch; gap: 0.3em; }
+.fig-switch { position: absolute; top: 0; right: 0; z-index: 2; display: flex; background: var(--bg2); border-radius: 99px; padding: 0.15em; font-size: 0.75em; }
+.fig-switch button { border: 0; background: none; color: var(--muted); padding: 0.15em 0.8em; border-radius: 99px; font-weight: 700; }
+.fig-switch button.on { background: var(--text); color: var(--bg); }
