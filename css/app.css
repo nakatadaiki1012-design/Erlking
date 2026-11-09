@@ -473,3 +473,16 @@ body.teacher .sheet.sheet-wide { font-size: 0.8em; }
 .fig-switch { position: absolute; top: 0; right: 0; z-index: 2; display: flex; background: var(--bg2); border-radius: 99px; padding: 0.15em; font-size: 0.75em; }
 .fig-switch button { border: 0; background: none; color: var(--muted); padding: 0.15em 0.8em; border-radius: 99px; font-weight: 700; }
 .fig-switch button.on { background: var(--text); color: var(--bg); }
+
+/* ガイドのコース切りかえ */
+.g-side { display: flex; flex-direction: column; gap: 0.5em; min-height: 0; }
+.g-course { align-self: stretch; }
+.g-course button { flex: 1; }
+.v-guide.deep .g-num { color: var(--erlking); }
+.v-guide.deep .g-list li.on .n { background: var(--erlking); }
+@media (max-width: 900px) { .g-side { flex-direction: row; align-items: center; flex-wrap: wrap; } .g-course { align-self: auto; } }
+
+.g-list { gap: 0.12em; }
+.g-list button { padding: 0.12em 0.5em; }
+.g-list .n { width: 1.55em; height: 1.55em; }
+body.teacher .g-side { font-size: 0.88em; }

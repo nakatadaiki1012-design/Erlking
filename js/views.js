@@ -225,28 +225,47 @@
   /* ---------- ガイド（聴きどころを順番に） ---------- */
   function GuideView(host, variant) {
     const T = variant === 'teacher';
-    const G = D.guide;
+    const P = T ? 't.' : 's.';
+    let course = store.get(P + 'course', 'basic');   // basic＝基本 / deep＝もっと深く
+    let G = course === 'deep' ? D.guideDeep : D.guide;
     const v = el('section', 'view v-guide');
-    v.innerHTML = `<ol class="g-list"></ol><div class="g-card"></div>`;
+    v.innerHTML = `<div class="g-side"><div class="seg-pick g-course"><button data-c="basic">基本</button><button data-c="deep">もっと深く</button></div><ol class="g-list"></ol></div><div class="g-card"></div>`;
     host.append(v);
     const list = $('.g-list', v), card = $('.g-card', v);
     const memo = store.get('memo2', {});
-    let cur = store.get(T ? 't.guide' : 's.guide', 0);
+    let cur = store.get(P + 'guide.' + course, 0);
     if (!(cur >= 0 && cur < G.length)) cur = 0;
+    v.querySelectorAll('.g-course button').forEach((b) => b.onclick = () => setCourse(b.dataset.c));
+    function setCourse(c) {
+      if (c === course) return;
+      stop();
+      course = c; store.set(P + 'course', c);
+      G = c === 'deep' ? D.guideDeep : D.guide;
+      cur = store.get(P + 'guide.' + course, 0);
+      if (!(cur >= 0 && cur < G.length)) cur = 0;
+      shown = 0;
+      buildList(); render();
+    }
     let shown = 0;       // 先生用：「わかったこと」をいくつ見せたか
     let playing = -1;    // 流れている「聴く部分」の番号
     let figMode = store.get('figmode', 'fig');   // 図 or 鍵盤
     let gkeys = null;
-    G.forEach((g, i) => {
-      const li = el('li', '', `<button><span class="n">${i + 1}</span><span class="t">${g.short}</span></button>`);
-      $('button', li).onclick = () => go(i);
-      list.append(li);
-    });
+    function buildList() {
+      list.innerHTML = '';
+      v.classList.toggle('deep', course === 'deep');
+      v.querySelectorAll('.g-course button').forEach((b) => b.classList.toggle('on', b.dataset.c === course));
+      G.forEach((g, i) => {
+        const li = el('li', '', `<button><span class="n">${i + 1}</span><span class="t">${g.short}</span></button>`);
+        $('button', li).onclick = () => go(i);
+        list.append(li);
+      });
+    }
+    buildList();
     function go(i) {
       if (i < 0 || i >= G.length) return;
       stop();
       cur = i; shown = 0;
-      store.set(T ? 't.guide' : 's.guide', cur);
+      store.set(P + 'guide.' + course, cur);
       render();
     }
     function stop() { if (playing >= 0) { Player.clearClip(); Player.pause(); } playing = -1; }
@@ -285,7 +304,7 @@
         li.classList.toggle('memo', !!(memo[G[i].id] && memo[G[i].id].trim()));
       });
       card.innerHTML = `
-        <div class="g-head"><span class="g-num">聴きどころ ${cur + 1}</span><h2>${g.title}</h2></div>
+        <div class="g-head"><span class="g-num">${course === 'deep' ? 'もっと深く' : '聴きどころ'} ${cur + 1}</span><h2>${g.title}</h2></div>
         <div class="g-ask"><span class="tag">聴く前に</span><p>${g.ask}</p></div>
         <div class="g-clips">${g.clips.map((c, k) => `<button class="g-clip ${c.role ? 'r-' + c.role : ''}"><span class="ic">▶</span>${c.label}<small>${fmt(Song.clipOf(c)[1] - Song.clipOf(c)[0])}</small></button>`).join('')}</div>
         ${T ? '' : `<div class="g-memo"><div class="g-memo-h"><span class="tag">気づいたこと・感じたこと</span><button class="btn small g-words">ことばのヒント</button></div><textarea rows="2" placeholder="${D.wordbank.pattern}">${(memo[g.id] || '').replace(/</g, '&lt;')}</textarea></div>`}
@@ -342,7 +361,10 @@
         ta.selectionStart = ta.selectionEnd = a + w.length;
         ta.dispatchEvent(new Event('input'));
       },
-      memos() { return G.map((g, i) => ({ n: i + 1, title: g.title, text: memo[g.id] || '' })); },
+      memos() {
+        return D.guide.map((g, i) => ({ n: String(i + 1), title: g.title, text: memo[g.id] || '' }))
+          .concat(D.guideDeep.map((g, i) => ({ n: 'もっと深く' + (i + 1), title: g.title, text: memo[g.id] || '', deep: true })).filter((m) => m.text));
+      },
       key(k) {
         if (k === 'next') go(cur + 1);
         else if (k === 'prev') go(cur - 1);

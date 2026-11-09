@@ -326,9 +326,86 @@
       ${txt(200, 166, '何度も調が変わる（転調）ことで、場面の変化を表している', { anchor: 'middle', size: 10 })}`, 'art-keys');
   }
 
+  /* ---------- 詩の形と音楽の形 ---------- */
+  function form() {
+    const st = [['narrator'], ['father', 'son'], ['erlking'], ['son', 'father'], ['erlking'], ['son', 'father'], ['erlking', 'son'], ['narrator']];
+    const bw = 44, gap = 4, x0 = 20;
+    const boxes = st.map((roles, i) => {
+      const x = x0 + i * (bw + gap);
+      return roles.map((r, j) => `<rect x="${x}" y="${30 + j * (34 / roles.length)}" width="${bw}" height="${34 / roles.length}" fill="var(--${r})"/>`).join('') +
+        `<rect x="${x}" y="30" width="${bw}" height="34" fill="none" stroke="#0e1320" stroke-width="1.5"/>` +
+        txt(x + bw / 2, 24, (i + 1) + '連', { anchor: 'middle', size: 9.5 }) +
+        `<path d="M${x + 6} 84 q${(bw - 12) / 4} ${-8 - (i % 3) * 4} ${(bw - 12) / 2} 0 t${(bw - 12) / 2} ${i % 2 ? 6 : -4}" stroke="var(--text)" stroke-width="2" fill="none"/>`;
+    }).join('');
+    const same = [0, 1, 2].map((i) => `<path d="M${250 + i * 50} 136 q8 -10 16 0 t16 0" stroke="var(--muted)" stroke-width="2" fill="none"/>` + txt(266 + i * 50, 152, (i + 1) + '番', { anchor: 'middle', size: 9 })).join('');
+    return svg('0 0 400 165', `
+      ${txt(20, 12, '「魔王」の詩（8つの連）と音楽', { size: 11, fill: 'var(--text)' })}
+      ${boxes}
+      ${txt(20, 104, '通作歌曲：物語に合わせて、最後まで新しい音楽', { size: 11.5, fill: 'var(--son)', weight: 800 })}
+      <rect x="10" y="114" width="380" height="1" fill="#3a4462"/>
+      ${txt(20, 140, '有節歌曲（例：野ばら）', { size: 11, fill: 'var(--text)' })}
+      ${txt(20, 155, '同じメロディーを くり返す', { size: 9.5 })}
+      ${same}`, 'art-form');
+  }
+
+  /* ---------- 叫びの高さ（鍵盤） ---------- */
+  function cryKeys() {
+    const whites = ['ド', 'レ', 'ミ', 'ファ', 'ソ', 'ラ'];
+    const W = 48, x0 = 56, y0 = 52;
+    const keys = whites.map((n, i) => `<rect x="${x0 + i * W}" y="${y0}" width="${W - 2}" height="90" rx="4" fill="${[1, 2, 3].includes(i) ? '#ffe9b8' : '#f5f1e6'}"/>` + txt(x0 + i * W + W / 2 - 1, y0 + 82, n, { anchor: 'middle', size: 11, fill: INK })).join('');
+    const blacks = [0, 1, 3, 4].map((i) => `<rect x="${x0 + i * W + W * 0.66}" y="${y0}" width="${W * 0.62}" height="54" rx="3" fill="${INK}"/>`).join('');
+    const mk = [[1, '①'], [2, '②'], [3, '③']].map(([i, m], k) => {
+      const cx = x0 + i * W + W / 2 - 1;
+      return `<circle cx="${cx}" cy="${y0 + 66}" r="12" fill="var(--son)"/>` + txt(cx, y0 + 71, m, { anchor: 'middle', size: 13, fill: INK, weight: 800 }) +
+        `<path d="M${cx} ${y0 - 6} v${-10 - k * 10}" stroke="var(--son)" stroke-width="3"/>`;
+    }).join('');
+    return svg('0 0 400 160', `
+      ${txt(200, 14, '叫びのいちばん高い音（この録音・だいたい）', { anchor: 'middle', size: 11, fill: 'var(--text)' })}
+      ${keys}${blacks}${mk}
+      ${txt(x0 + 1.5 * W + W / 2, 34, '1音↑', { anchor: 'middle', size: 11, fill: 'var(--son)' })}
+      ${txt(x0 + 2.5 * W + W / 2, 30, '半音↑', { anchor: 'middle', size: 11, fill: 'var(--son)' })}
+      ${txt(372, 96, '高く', { anchor: 'middle', size: 12, fill: 'var(--son)' })}<path d="M372 80 v-24" stroke="var(--son)" stroke-width="2"/><path d="M366 60 l6 -9 l6 9Z" fill="var(--son)"/>`, 'art-crykeys');
+  }
+
+  /* ---------- 三連符を数える ---------- */
+  function triplets() {
+    const ticks = [];
+    for (let i = 0; i < 12; i++) {
+      const x = 40 + i * 28 + Math.floor(i / 3) * 4;
+      ticks.push(`<rect class="n rh" x="${x - 9}" y="48" width="18" height="18" rx="4" style="--d:${(i / 12 * 1.67).toFixed(3)}s"/>`);
+    }
+    const beats = [0, 1, 2, 3].map((k) => { const x = 40 + k * 88; return `<path d="M${x - 9} 76 V82 H${x + 65} V76" stroke="var(--son)" fill="none"/>` + txt(x + 28, 96, '♩＝1拍 → 3つ', { anchor: 'middle', size: 10, fill: 'var(--son)' }); }).join('');
+    return svg('0 0 400 160', `
+      ${txt(20, 24, '右手：同じ音を3つずつ打つ（三連符）', { size: 12, fill: 'var(--text)' })}
+      ${ticks.join('')}${beats}
+      <rect x="20" y="112" width="360" height="40" rx="10" fill="#ffffff" fill-opacity=".05"/>
+      ${txt(36, 137, '1秒に 約7〜8回', { size: 14, fill: 'var(--text)', weight: 800 })}
+      ${txt(210, 137, '前奏だけで 約150回', { size: 14, fill: 'var(--text)', weight: 800 })}`, 'art-triplets');
+  }
+
+  /* ---------- 年表 ---------- */
+  function history() {
+    const ev = [
+      ['1782', 'ゲーテが詩を書く', 'var(--narrator)'],
+      ['1797', 'シューベルト誕生', 'var(--muted)'],
+      ['1815', '「魔王」を作曲（18歳）', 'var(--son)'],
+      ['1816', '友人がゲーテに楽譜を送る（返事はなし）', 'var(--muted)'],
+      ['1821', '「作品1」として出版・評判に', 'var(--son)'],
+      ['1828', '31歳で亡くなる', 'var(--muted)']
+    ];
+    return svg('0 0 400 160', `
+      <path d="M78 12 V150" stroke="#6b7590" stroke-width="2"/>
+      ${ev.map(([y, l, c], i) => {
+        const yy = 20 + i * 25;
+        return `<circle cx="78" cy="${yy}" r="6" fill="${c}"/>` +
+          txt(64, yy + 5, y, { anchor: 'end', size: 13, fill: 'var(--text)', weight: 800 }) +
+          txt(94, yy + 5, l, { size: 13, fill: c === 'var(--muted)' ? 'var(--text)' : c, weight: 700 });
+      }).join('')}`, 'art-history');
+  }
+
   const figs = {
     gallop: () => `<div class="art-pair wide">${roll('gallop')}<div class="art-side">${char('piano')}<div class="art-cap">右手＝馬のひづめ<br>左手＝風・不気味さ</div></div></div>`,
-    voices, erlkingAcc, cries, dialogue, erlkingChange, about, melody, keys,
+    voices, erlkingAcc, cries, dialogue, erlkingChange, about, melody, keys, form, cryKeys, triplets, history,
     ending: () => roll('ending'),
     scene
   };
